@@ -655,7 +655,7 @@ function renderChart() {
 
   const youData = allDates.map(d => { const e = you.find(x => x.date === d); return e ? e.displayWeight : null; });
   const emilyData = allDates.map(d => { const e = emily.find(x => x.date === d); return e ? e.displayWeight : null; });
-  const labels = allDates.map(d => { const [y,m,day] = d.split('-'); return `${parseInt(m)}/${parseInt(day)}`; });
+  const labels = allDates.map(d => { const [y,m,day] = d.split('-'); return `${parseInt(day)}/${parseInt(m)}`; });
 
   if (chart) chart.destroy();
   const ctx = document.getElementById('weightChart').getContext('2d');
@@ -707,7 +707,7 @@ function renderLog() {
   ll.innerHTML = sorted.map(e => {
     const w = toDisplayUnit(e.weight, e.unit);
     const [y,m,d] = e.date.split('-');
-    const dateStr = `${parseInt(m)}/${parseInt(d)}/${y}`;
+    const dateStr = `${parseInt(d)}/${parseInt(m)}/${y}`;
     const cls = e.person === 'you' ? 'you' : 'emily';
     const name = e.person === 'you' ? 'Josh' : 'Emily';
     const dotColor = e.person === 'you' ? '#9B6FD4' : '#D4829A';
