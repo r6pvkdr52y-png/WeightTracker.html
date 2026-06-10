@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weight Tracker ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --lavender-deep:  #7C5CBF;
+    --lavender-mid:   #A78BD4;
+    --lavender-soft:  #C8AEEA;
+    --lavender-pale:  #EDE6F8;
+    --lavender-ghost: #F7F3FD;
+    --lilac-blush:    #E8D5F5;
+    --rose-accent:    #D4A0C8;
+    --rose-soft:      #F0D6EA;
+    --ink:            #2D1B4E;
+    --ink-light:      #6B4F8A;
+    --white:          #FFFFFF;
+    --josh-color:     #9B6FD4;
+    --emily-color:    #D4829A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--lavender-ghost);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--lavender-deep) 0%, var(--lavender-mid) 60%, var(--rose-accent) 100%);
+    padding: 36px 20px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -30px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: white;
+    line-height: 1.15;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: #F0D6EA;
+  }
+  .header-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 300;
+  }
+
+  /* MAIN CONTENT */
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lavender-mid);
+    margin: 28px 0 12px;
+  }
+
+  /* LOG CARD */
+  .log-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 22px 20px;
+    box-shadow: 0 2px 20px rgba(124,92,191,0.10);
+    border: 1px solid var(--lavender-pale);
+    overflow: hidden;
+  }
+
+  /* PERSON TOGGLE */
+  .person-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .person-btn {
+    padding: 12px;
+    border-radius: 14px;
+    border: 2px solid var(--lavender-pale);
+    background: var(--lavender-ghost);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-light);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .person-btn .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .person-btn.you .dot { background: var(--josh-color); }
+  .person-btn.emily .dot { background: var(--emily-color); }
+  .person-btn.active.you {
+    border-color: var(--josh-color);
+    background: #F0E8FF;
+    color: var(--josh-color);
+  }
+  .person-btn.active.emily {
+    border-color: var(--emily-color);
+    background: #FBF0F4;
+    color: var(--emily-color);
+  }
+
+  /* INPUT ROW */
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .input-group input[type="date"] {
+    font-size: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .input-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--lavender-pale);
+    background: var(--lavender-ghost);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus {
+    border-color: var(--lavender-mid);
+    background: white;
+  }
+
+  .log-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--lavender-deep), var(--lavender-mid));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(124,92,191,0.30);
+  }
+  .log-btn:active { transform: scale(0.98); }
+  .log-btn:hover { box-shadow: 0 6px 20px rgba(124,92,191,0.40); }
+  .log-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    border: 1px solid var(--lavender-pale);
+    box-shadow: 0 2px 12px rgba(124,92,191,0.07);
+  }
+  .stat-card.full { grid-column: span 2; }
+  .stat-who {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .stat-who.you { color: var(--josh-color); }
+  .stat-who.emily { color: var(--emily-color); }
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-val span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-light);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-top: 3px;
+  }
+  .stat-change {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .stat-change.down { color: #5CAF7C; }
+  .stat-change.up   { color: #C96B6B; }
+  .stat-change.same { color: var(--ink-light); }
+
+  /* CHART */
+  .chart-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 20px rgba(124,92,191,0.10);
+    border: 1px solid var(--lavender-pale);
+  }
+  .chart-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* LOG TABLE */
+  .log-table-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 20px rgba(124,92,191,0.10);
+    border: 1px solid var(--lavender-pale);
+  }
+  .log-table-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .log-entry {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--lavender-ghost);
+    gap: 10px;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-entry-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .log-entry-name {
+    font-size: 12px;
+    font-weight: 600;
+    width: 48px;
+    flex-shrink: 0;
+  }
+  .log-entry-name.you { color: var(--josh-color); }
+  .log-entry-name.emily { color: var(--emily-color); }
+  .log-entry-date {
+    font-size: 12px;
+    color: var(--ink-light);
+    flex: 1;
+  }
+  .log-entry-weight {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .log-entry-weight span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--ink-light);
+  }
+  .log-entry-del {
+    background: none;
+    border: none;
+    color: #C8AEEA;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+  .log-entry-del:hover { color: #C96B6B; }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--ink-light);
+    font-size: 14px;
+  }
+  .empty-state .emoji { font-size: 32px; display: block; margin-bottom: 8px; }
+
+  /* MONDAY BADGE */
+  .monday-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lavender-mid);
+    background: var(--lavender-pale);
+    padding: 4px 10px;
+    border-radius: 50px;
+    margin-bottom: 14px;
+  }
+
+  .unit-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+  .unit-toggle button {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--lavender-pale);
+    background: var(--lavender-ghost);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ink-light);
+    transition: all 0.15s;
+  }
+  .unit-toggle button.active {
+    background: var(--lavender-deep);
+    border-color: var(--lavender-deep);
+    color: white;
+  }
+
+  /* SYNC STATUS */
+  .sync-status {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 10px;
+    min-height: 16px;
+  }
+  .sync-status.syncing { color: var(--lavender-mid); }
+  .sync-status.error   { color: #C96B6B; }
+  .sync-status.live    { color: #5CAF7C; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Monday Weigh-In</div>
+  <h1>Our Weight<br><em>Journey</em> ✦</h1>
+  <div class="header-sub">Josh & Emily · Weekly Progress</div>
+</div>
+
+<div class="container">
+
+  <!-- LOG SECTION -->
+  <div class="section-label">Log Your Weight</div>
+  <div class="log-card">
+    <div class="monday-badge">⚖️ Best logged every Monday</div>
+
+    <div class="person-toggle">
+      <button class="person-btn you active" onclick="selectPerson('you')">
+        <span class="dot"></span> Josh
+      </button>
+      <button class="person-btn emily" onclick="selectPerson('emily')">
+        <span class="dot"></span> Emily
+      </button>
+    </div>
+
+    <div class="unit-toggle">
+      <span>Unit:</span>
+      <button id="btn-lbs" class="active" onclick="setUnit('lbs')">lbs</button>
+      <button id="btn-kg" onclick="setUnit('kg')">kg</button>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="date-input">
+      </div>
+      <div class="input-group">
+        <label>Weight</label>
+        <input type="number" id="weight-input" placeholder="e.g. 148" step="0.1" inputmode="decimal">
+      </div>
+    </div>
+
+    <button class="log-btn" id="log-btn" onclick="logWeight()">Log Weight ✦</button>
+    <div class="sync-status" id="sync-status">Connecting to database…</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="section-label">Progress</div>
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card empty-state full"><span class="emoji">🌸</span>Log your first weigh-in to see stats!</div>
+  </div>
+
+  <!-- CHART -->
+  <div class="section-label">Progress Chart</div>
+  <div class="chart-card">
+    <div class="chart-title">Weight Over Time</div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--josh-color)"></div>Josh</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--emily-color)"></div>Emily</div>
+    </div>
+    <canvas id="weightChart" height="220"></canvas>
+  </div>
+
+  <!-- LOG HISTORY -->
+  <div class="section-label">History</div>
+  <div class="log-table-card">
+    <div class="log-table-title">All Entries</div>
+    <div id="log-list"><div class="empty-state"><span class="emoji">📋</span>No entries yet</div></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ─── FIREBASE SETUP ───────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyB7n1ta9mctkO2r_POqAQQNWGs89-herqE",
+  authDomain: "weighttracker-c59df.firebaseapp.com",
+  projectId: "weighttracker-c59df",
+  storageBucket: "weighttracker-c59df.firebasestorage.app",
+  messagingSenderId: "1038763378023",
+  appId: "1:1038763378023:web:820edc382b8d4f8a39dbc2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let selectedPerson = 'you';
+let unit = 'lbs';
+let entries = [];
+let chart;
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+window.selectPerson = function(p) {
+  selectedPerson = p;
+  document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.person-btn.' + p).classList.add('active');
+}
+
+window.setUnit = function(u) {
+  unit = u;
+  document.getElementById('btn-lbs').classList.toggle('active', u === 'lbs');
+  document.getElementById('btn-kg').classList.toggle('active', u === 'kg');
+  // Save unit preference to Firebase
+  setDoc(doc(db, 'settings', 'unit'), { value: u }).catch(() => {});
+  render();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function setSyncStatus(msg, cls) {
+  const s = document.getElementById('sync-status');
+  s.textContent = msg;
+  s.className = 'sync-status ' + (cls || '');
+}
+
+// ─── INIT DATE ────────────────────────────────────────────────────────────────
+document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+
+// ─── LOG WEIGHT ───────────────────────────────────────────────────────────────
+window.logWeight = async function() {
+  const w = parseFloat(document.getElementById('weight-input').value);
+  const d = document.getElementById('date-input').value;
+  if (!w || w <= 0) { showToast('Enter a valid weight ✦'); return; }
+  if (!d) { showToast('Pick a date ✦'); return; }
+
+  const btn = document.getElementById('log-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    await addDoc(collection(db, 'entries'), {
+      person: selectedPerson,
+      weight: w,
+      unit,
+      date: d,
+      id: Date.now()
+    });
+    document.getElementById('weight-input').value = '';
+    showToast(selectedPerson === 'you' ? '✦ Logged for Josh!' : '✦ Logged for Emily!');
+  } catch(e) {
+    showToast('Error saving — check connection');
+    setSyncStatus('Save failed', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Log Weight ✦';
+}
+
+window.deleteEntry = async function(docId) {
+  try {
+    await deleteDoc(doc(db, 'entries', docId));
+  } catch(e) {
+    showToast('Error deleting entry');
+  }
+}
+
+// ─── CONVERT ─────────────────────────────────────────────────────────────────
+function toDisplayUnit(w, fromUnit) {
+  if (fromUnit === unit) return w;
+  if (unit === 'kg') return +(w * 0.453592).toFixed(1);
+  return +(w * 2.20462).toFixed(1);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderChart();
+  renderLog();
+}
+
+function getPersonEntries(person) {
+  return entries
+    .filter(e => e.person === person)
+    .map(e => ({ ...e, displayWeight: toDisplayUnit(e.weight, e.unit) }))
+    .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+function renderStats() {
+  const sg = document.getElementById('stats-grid');
+  const you = getPersonEntries('you');
+  const emily = getPersonEntries('emily');
+
+  if (!you.length && !emily.length) {
+    sg.innerHTML = '<div class="stat-card empty-state full"><span class="emoji">🌸</span>Log your first weigh-in to see stats!</div>';
+    return;
+  }
+
+  function buildStat(arr, cls, name) {
+    if (!arr.length) return '';
+    const first = arr[0].displayWeight;
+    const last = arr[arr.length-1].displayWeight;
+    const diff = +(last - first).toFixed(1);
+    const changeClass = diff < 0 ? 'down' : diff > 0 ? 'up' : 'same';
+    const changeLabel = diff < 0 ? `↓ ${Math.abs(diff)} ${unit} lost` : diff > 0 ? `↑ ${diff} ${unit} gained` : '— no change';
+    return `
+      <div class="stat-card">
+        <div class="stat-who ${cls}">${name}</div>
+        <div class="stat-val">${last} <span>${unit}</span></div>
+        <div class="stat-label">current weight</div>
+        <div class="stat-change ${changeClass}">${changeLabel}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-who ${cls}">${name}</div>
+        <div class="stat-val">${first} <span>${unit}</span></div>
+        <div class="stat-label">starting weight</div>
+        <div class="stat-change same">${arr.length} check-in${arr.length !== 1 ? 's' : ''}</div>
+      </div>
+    `;
+  }
+
+  sg.innerHTML = buildStat(you, 'you', 'Josh') + buildStat(emily, 'emily', 'Emily');
+}
+
+function renderChart() {
+  const you = getPersonEntries('you');
+  const emily = getPersonEntries('emily');
+  const allDates = [...new Set([...you.map(e=>e.date), ...emily.map(e=>e.date)])].sort();
+
+  const youData = allDates.map(d => { const e = you.find(x => x.date === d); return e ? e.displayWeight : null; });
+  const emilyData = allDates.map(d => { const e = emily.find(x => x.date === d); return e ? e.displayWeight : null; });
+  const labels = allDates.map(d => { const [y,m,day] = d.split('-'); return `${parseInt(m)}/${parseInt(day)}`; });
+
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('weightChart').getContext('2d');
+
+  const youGrad = ctx.createLinearGradient(0,0,0,200);
+  youGrad.addColorStop(0,'rgba(155,111,212,0.25)');
+  youGrad.addColorStop(1,'rgba(155,111,212,0)');
+  const emilyGrad = ctx.createLinearGradient(0,0,0,200);
+  emilyGrad.addColorStop(0,'rgba(212,130,154,0.25)');
+  emilyGrad.addColorStop(1,'rgba(212,130,154,0)');
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Josh', data: youData, borderColor: '#9B6FD4', backgroundColor: youGrad, borderWidth: 2.5, pointBackgroundColor: '#9B6FD4', pointRadius: 5, pointHoverRadius: 7, tension: 0.4, fill: true, spanGaps: true },
+        { label: 'Emily', data: emilyData, borderColor: '#D4829A', backgroundColor: emilyGrad, borderWidth: 2.5, pointBackgroundColor: '#D4829A', pointRadius: 5, pointHoverRadius: 7, tension: 0.4, fill: true, spanGaps: true }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#2D1B4E',
+          titleFont: { family: 'DM Sans', size: 12 },
+          bodyFont: { family: 'DM Sans', size: 13 },
+          padding: 10,
+          cornerRadius: 10,
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} ${unit}` }
+        }
+      },
+      scales: {
+        x: { grid: { color: '#F0E8FF', drawBorder: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#6B4F8A' } },
+        y: { grid: { color: '#F0E8FF', drawBorder: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#6B4F8A', callback: v => `${v} ${unit}` } }
+      }
+    }
+  });
+}
+
+function renderLog() {
+  const ll = document.getElementById('log-list');
+  if (!entries.length) {
+    ll.innerHTML = '<div class="empty-state"><span class="emoji">📋</span>No entries yet</div>';
+    return;
+  }
+  const sorted = [...entries].sort((a,b) => b.date.localeCompare(a.date));
+  ll.innerHTML = sorted.map(e => {
+    const w = toDisplayUnit(e.weight, e.unit);
+    const [y,m,d] = e.date.split('-');
+    const dateStr = `${parseInt(m)}/${parseInt(d)}/${y}`;
+    const cls = e.person === 'you' ? 'you' : 'emily';
+    const name = e.person === 'you' ? 'Josh' : 'Emily';
+    const dotColor = e.person === 'you' ? '#9B6FD4' : '#D4829A';
+    return `
+      <div class="log-entry">
+        <div class="log-entry-dot" style="background:${dotColor}"></div>
+        <div class="log-entry-name ${cls}">${name}</div>
+        <div class="log-entry-date">${dateStr}</div>
+        <div class="log-entry-weight">${w} <span>${unit}</span></div>
+        <button class="log-entry-del" onclick="deleteEntry('${e.docId}')">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── REAL-TIME LISTENER ───────────────────────────────────────────────────────
+const q = query(collection(db, 'entries'), orderBy('date', 'asc'));
+onSnapshot(q, (snapshot) => {
+  entries = snapshot.docs.map(d => ({ ...d.data(), docId: d.id }));
+  setSyncStatus('● Live', 'live');
+  render();
+}, (err) => {
+  setSyncStatus('Connection error', 'error');
+});
+
+// ─── LOAD SAVED UNIT PREFERENCE ───────────────────────────────────────────────
+getDoc(doc(db, 'settings', 'unit')).then(d => {
+  if (d.exists()) {
+    const u = d.data().value;
+    unit = u;
+    document.getElementById('btn-lbs').classList.toggle('active', u === 'lbs');
+    document.getElementById('btn-kg').classList.toggle('active', u === 'kg');
+    render();
+  }
+}).catch(() => {});
+
+</script>
+</body>
+</html>
